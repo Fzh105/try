@@ -31,7 +31,7 @@ def send_reminder_emails():
             print(f"User {user_email} has not submitted or marked rest day for {today}. Sending reminder...")
             subject = f"OutputTime Reminder - {today}"
             body = f"Hi {user_email.split('@')[0]},\n\nJust a friendly reminder to complete your daily summary for {today} on OutputTime!\n\nDon't forget, consistency is key.\n\nBest,\nOutputTime Bot"
-            mailer.send_email(user_email, subject, body)
+      #      mailer.send_email(user_email, subject, body)
     finally:
         db.close() # 确保关闭数据库会话
 
@@ -73,7 +73,7 @@ def apply_penalties():
                 # 发送惩罚通知邮件
                 subject = "OutputTime - Rest Day Status Update"
                 body = f"Hi {user_email.split('@')[0]},\n\nBased on your activity last week ({last_monday} to {last_sunday}), you did not meet the minimum requirement ({days_needed_to_complete} summaries).\n\nAs a result, your rest day for the upcoming week has been cancelled.\n\nLet's aim for better consistency this week!\n\nBest,\nOutputTime Bot"
-                mailer.send_email(user_email, subject, body)
+            #    mailer.send_email(user_email, subject, body)
             else:
                 print(f"  No penalty. User {user_email} keeps rest day next week.")
                 db_utils.update_rest_day_status(db, user_email, has_rest_day=True) # 确保下周有休息日
