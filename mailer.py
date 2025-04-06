@@ -3,6 +3,7 @@ import json
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import formataddr
+import streamlit as st
 
 
 import os
@@ -14,9 +15,11 @@ def load_email_config(path='D:\.email_config.json'):
     return config['email'], config['password']
 
 # === 基本配置 ===
-SMTP_SERVER = 'smtp.163.com'
-SMTP_PORT = 465
-SENDER_EMAIL, SENDER_PASSWORD = load_email_config()
+SMTP_SERVER = st.secrets.get("SMTP_SERVER")
+SMTP_PORT = int(st.secrets.get("SMTP_PORT", 465)) # 端口号需要是整数
+SENDER_EMAIL = st.secrets.get("SENDER_EMAIL",)
+SENDER_PASSWORD = st.secrets.get("SENDER_PASSWORD")
+
 
 def send_email(recipient_email, subject, body):
     """发送邮件"""
