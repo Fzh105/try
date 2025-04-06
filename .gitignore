@@ -1,0 +1,6 @@
+# .gitignore
+venv/
+__pycache__/
+*.pyc
+*.db # 如果还有旧的 .db 文件
+.streamlit/ # 忽略本地 secrets
