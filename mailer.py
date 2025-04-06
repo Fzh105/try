@@ -8,18 +8,13 @@ import streamlit as st
 
 import os
 
-# === 从配置文件中读取邮箱和密码 ===
-def load_email_config(path='D:\.email_config.json'):
-    with open(path, 'r') as f:
-        config = json.load(f)
-    return config['email'], config['password']
 
-# === 基本配置 ===
-SMTP_SERVER = st.secrets.get("SMTP_SERVER")
-SMTP_PORT = int(st.secrets.get("SMTP_PORT", 465)) # 端口号需要是整数
-SENDER_EMAIL = st.secrets.get("SENDER_EMAIL",)
-SENDER_PASSWORD = st.secrets.get("SENDER_PASSWORD")
 
+# --- 从 Streamlit Secrets 读取邮箱配置 ---
+SMTP_SERVER = st.secrets.get("email", {}).get("smtp_server", "smtp.example.com")
+SMTP_PORT = int(st.secrets.get("email", {}).get("smtp_port", 465))
+SENDER_EMAIL = st.secrets.get("email", {}).get("sender_email", "your_sender_email@example.com")
+SENDER_PASSWORD = st.secrets.get("email", {}).get("sender_password", "your_email_password_or_app_password")
 
 def send_email(recipient_email, subject, body):
     """发送邮件"""
