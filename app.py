@@ -58,7 +58,7 @@ def show_login_page():
         password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Login")
         if submitted:
-            # --- 修改：直接创建和关闭 Session ---
+            # 直接创建和关闭 Session
             db = SessionLocal()
             try:
                 # 使用 db_utils 中的函数验证用户，传入 db 会话
@@ -67,17 +67,16 @@ def show_login_page():
                     st.session_state['logged_in'] = True
                     st.session_state['user_email'] = email
                     st.session_state['page'] = 'Main'
-                    st.experimental_rerun() # 重新运行以显示主页
+                    st.rerun() # <-- 修改处
                 else:
                     st.error("Invalid email or password")
             finally:
                 db.close() # 确保会话被关闭
-            # --- 修改结束 ---
 
     # 跳转到注册页面的按钮
     if st.button("Don't have an account? Register"):
         st.session_state['page'] = 'Register'
-        st.experimental_rerun()
+        st.rerun() # <-- 修改处
 
 # --- 注册页面 ---
 def show_register_page():
@@ -94,7 +93,7 @@ def show_register_page():
             elif not email or not password:
                  st.error("Email and password cannot be empty!")
             else:
-                # --- 修改：直接创建和关闭 Session ---
+                # 直接创建和关闭 Session
                 db = SessionLocal()
                 try:
                     # 使用 db_utils 中的函数添加用户，传入 db 会话
@@ -102,18 +101,17 @@ def show_register_page():
                         st.success("Registration successful! Please login.")
                         st.info("Reminders are active by default. You can change this in Settings after logging in.")
                         st.session_state['page'] = 'Login' # 跳转回登录页
-                        st.experimental_rerun()
+                        st.rerun() # <-- 修改处
                     else:
                         # add_user 内部会打印具体错误，这里给通用提示
                         st.error("Registration failed. Email might already exist.")
                 finally:
                     db.close() # 确保会话被关闭
-                # --- 修改结束 ---
 
     # 跳转回登录页面的按钮
     if st.button("Already have an account? Login"):
         st.session_state['page'] = 'Login'
-        st.experimental_rerun()
+        st.rerun() # <-- 修改处
 
 
 # --- 设置页面 ---
@@ -121,7 +119,7 @@ def show_settings_page():
     st.header("Settings")
     user_email = st.session_state['user_email']
 
-    # --- 修改：直接创建和关闭 Session ---
+    # 直接创建和关闭 Session
     db = SessionLocal()
     try:
         # 使用 db_utils 获取用户偏好，传入 db 会话
@@ -132,7 +130,7 @@ def show_settings_page():
             st.error("Could not load your preferences. Please try again later.")
             if st.button("Back to Main"):
                 st.session_state['page'] = 'Main'
-                st.experimental_rerun()
+                st.rerun() # <-- 修改处
             return
 
         st.subheader("Email Reminders & Rules")
@@ -154,7 +152,7 @@ def show_settings_page():
                  if db_utils.update_reminder_preference(db, user_email, new_preference):
                      st.success("Preference updated successfully!")
                      time.sleep(1.5) # 等待用户看到成功消息
-                     st.experimental_rerun() # 刷新页面以反映最新状态
+                     st.rerun() # <-- 修改处
                  else:
                      st.error("Failed to update preference. Please try again.")
         else:
@@ -169,20 +167,19 @@ def show_settings_page():
 
     finally:
         db.close() # 确保会话被关闭
-    # --- 修改结束 ---
 
     # 返回主页按钮
     st.divider()
     if st.button("Back to Main Page"):
         st.session_state['page'] = 'Main'
-        st.experimental_rerun()
+        st.rerun() # <-- 修改处
 
 
 # --- 主应用界面 ---
 def show_main_page():
     user_email = st.session_state['user_email']
 
-    # --- 修改：直接创建和关闭 Session ---
+    # 直接创建和关闭 Session
     db = SessionLocal()
     try:
         # 获取用户偏好
@@ -194,7 +191,7 @@ def show_main_page():
                   st.session_state['user_email'] = None
                   st.session_state['page'] = 'Login'
                   st.session_state.pop('scheduler_started', None)
-                  st.experimental_rerun()
+                  st.rerun() # <-- 修改处
              return
 
         accepts_reminders = prefs['accepts_reminders']
@@ -226,7 +223,7 @@ def show_main_page():
         # 设置按钮
         if st.sidebar.button("⚙️ Settings"):
              st.session_state['page'] = 'Settings'
-             st.experimental_rerun()
+             st.rerun() # <-- 修改处
 
         st.sidebar.divider()
         # 登出按钮
@@ -234,8 +231,8 @@ def show_main_page():
             st.session_state['logged_in'] = False
             st.session_state['user_email'] = None
             st.session_state['page'] = 'Login'
-            st.session_state.pop('scheduler_started', None)
-            st.experimental_rerun()
+            st.session_state.pop('scheduler_started', None) # 移除调度器状态
+            st.rerun() # <-- 修改处
 
 
         # --- 主内容区 ---
@@ -278,11 +275,11 @@ def show_main_page():
                  # 处理表单提交
                  if submit_button:
                      # 情况1：使用休息日（必须接受提醒、勾选了选项、且有额度）
-                     if accepts_reminders and use_rest_day and can_rest_today_check:
+                     if accepts_reminders and use_rest_day and can_rest_today_check: # 双重检查额度
                          if db_utils.save_summary(db, user_email, today_for_summary, "REST DAY", 0, is_rest_day=True):
                               st.success("Today marked as rest day!")
-                              time.sleep(1)
-                              st.experimental_rerun()
+                              time.sleep(1) # 短暂显示成功消息
+                              st.rerun() # <-- 修改处
                          else:
                               st.error("Failed to mark rest day. Maybe you already submitted today?")
                      # 情况2：正常提交总结（字数达标）
@@ -290,7 +287,7 @@ def show_main_page():
                          if db_utils.save_summary(db, user_email, today_for_summary, summary_text, word_count, is_rest_day=False):
                              st.success("Summary submitted successfully!")
                              time.sleep(1)
-                             st.experimental_rerun()
+                             st.rerun() # <-- 修改处
                          else:
                              st.error("Failed to submit summary. Maybe you already submitted today?")
                      # 情况3：未勾选休息日且字数不够
@@ -305,31 +302,33 @@ def show_main_page():
         # 使用 db_utils 获取 DataFrame
         history_df = db_utils.get_summaries_by_user_df(db, user_email)
         if not history_df.empty:
+            # 使用 st.dataframe 展示，可以启用列配置等高级功能
             st.dataframe(history_df, use_container_width=True, hide_index=True)
         else:
             st.write("No summaries submitted yet.")
 
     finally:
         db.close() # 确保在函数结束时关闭会话
-    # --- 修改结束 ---
 
 
 # --- 页面路由逻辑 ---
 # 根据 session_state 中的 page 值决定显示哪个函数定义的页面
 if not st.session_state.get('logged_in', False):
+    # 未登录状态
     if st.session_state.get('page', 'Login') == 'Register':
         show_register_page()
-    else:
+    else: # 默认显示登录页
         show_login_page()
 else:
+    # 已登录状态
     if st.session_state.get('page', 'Main') == 'Settings':
         show_settings_page()
-    else:
-        # 确保默认显示主页
+    else: # 默认显示主页 (Main)
+        # 确保 page 状态明确，如果不是 Settings，则设为 Main
         st.session_state['page'] = 'Main'
         show_main_page()
 
 
 # --- 页脚 ---
 st.markdown("---")
-st.caption("OutputTime v0.4 - Session Fix")
+st.caption("OutputTime v0.3 - Rerun Fix")
